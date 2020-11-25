@@ -1,0 +1,14 @@
+doc/latex
+test/bin/*
+test/data/*
+test/plots/*
+!test/plots/*.py
+test/dict/*.txt
+
+**/CMakeFiles
+**/CMakeCache.txt
+**/bin
+**/conaninfo.txt
+**/*.cmake
+**/Makefile
+**/Testing

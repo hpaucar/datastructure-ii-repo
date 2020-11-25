@@ -1,0 +1,64 @@
+language: cpp
+compiler:
+- gcc
+
+install:
+# Upgrade CMake
+- sudo apt-get remove --purge -qq cmake
+- sudo add-apt-repository ppa:george-edison55/precise-backports -y
+- sudo apt-get update -qq
+- sudo apt-get install -qq cmake
+
+# Upgrade GCC
+- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+- sudo apt-get update -qq
+- sudo apt-get install -qq g++-4.9
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 60 --slave /usr/bin/g++ g++ /usr/bin/g++-4.9
+
+# Download conan
+- wget http://downloads.conan.io/latest_debian -O conan.deb
+- sudo dpkg -i conan.deb
+- rm conan.deb
+
+# Automatic detection of your arch, compiler, etc
+- conan install
+- sudo pip install -U pip
+- sudo pip install cpp-coveralls
+
+
+- cmake --version
+
+script:
+- cmake .
+- make
+
+after_success:
+- make test
+- coveralls --exclude "test" --exclude "CMakeFiles" --include "trie/lib/" --include "TST/lib/" --include "Radix_Tree/lib/" --gcov-options '\-lp' --gcov 'gcov-4.9' 
+
+env:
+  global:
+    - secure: "Vaa8YA7/xN7YuaFf1H/IlBPbGHk49gKPu8a8cfRz3JOULuKGHNqLp6MLqLqOtzYnAVCDDv4EPq+PWR7Sq5tBR5usdYE/CpyaErUKYeTeZywR3FCj/7xTwOeSbnS9G9rloVuS2HBJpqcRs4lUncFtTK20LZTp35QJ+u11D7rlK6nOcmSLt9m0qHwG/q36vX32m9E2h9B9tbZl/mXOYK3BBRpnWARE31lEqlJM5mEiMBC3yd5XepySTqJS45Z9FOTPsYeTIilT5o6rhbeT5KXfPUinSnCw9ZxHJn+Vy43SJ2EWd1QvklAI2jFeA/4kzn6V9Tj5yA+31LGQjC+1rG+Qfbr7DArs5TsGwBgeU6YX5xfYtQOwh9Z1+ILw2b4E23o8A5CnjOBNYrdM5VQFnnL6+HsyEQtjYAL+S1JqzOQ1JxlwXpHRQwoH5/kBxMKoXe0EmOWZU/sAKAGefmcGXsl+3I6+bI1cdQVeZ1Hd1Valh6nTcV9oWymPDv3CgDaIct8gqumZ28hMzitCbxYRxZdrsFcx1WnFcwzSCDyq/QQVti6ZNGDj1f6qYs70V5BHPHZjwKpAHnXD6fGQVY3ZQzvOsnH+C8JDLdr6rNGpxJYK6lJ59FkG/DK3PpoMP6oZ4cYzRoz7HSMrzg6d2zbE4yXHD6PtpoF4ap8dKYg/Wym4Jh4="
+
+addons:
+  coverity_scan:
+    project:
+      name: maitesin/tries
+      version: 0.8
+      description: Tries comparison
+
+    # Where email notification of build analysis results will be sent
+    notification_email: violador.de.segmentos@gmail.com
+
+    # Commands to prepare for build_command
+    # ** likely specific to your build **
+    build_command_prepend: cmake .
+
+    # The command that will be added as an argument to "cov-build" to compile your project for analysis,
+    # ** likely specific to your build **
+    build_command: make
+
+    # Pattern to match selecting branches that will run analysis. We recommend leaving this set to 'coverity_scan'.
+    # Take care in resource usage, and consider the build frequency allowances per
+    #   https://scan.coverity.com/faq#frequency
+  branch_pattern: master
